@@ -1,13 +1,11 @@
 
 export const GET_BRANCHES_QUERY = `
--- This query retrieves the list of branch names.
--- You can modify this query to match your database schema.
--- For example, if your table is called 'StoreLocations' and the column is 'LocationName',
--- you would change it to: SELECT LocationName AS name FROM StoreLocations ORDER BY LocationName;
--- The query MUST return a single column named 'name'.
-SELECT name 
-FROM Branches 
-ORDER BY name;
+-- This query retrieves the list of branches.
+-- It MUST return two columns: 'branch' for the value/ID, and 'a_name' for the display label.
+-- Example: SELECT branch_code as branch, arabic_name as a_name FROM my_branch_table;
+SELECT branch, a_name 
+FROM sys_branch 
+ORDER BY a_name;
 `;
 
 export const UPDATE_CUSTOMER_QUERY = `

@@ -120,7 +120,10 @@ export async function getBranches(data: z.infer<typeof connectionSchema>) {
 
         await sql.close();
 
-        const branches = result.recordset.map((row: any) => row.name);
+        const branches = result.recordset.map((row: any) => ({
+            value: row.branch,
+            label: row.a_name
+        }));
         
         if (branches.length === 0) {
             return { success: true, message: 'Connection successful, but no branches found.', branches: [] };
@@ -140,7 +143,11 @@ export async function getBranches(data: z.infer<typeof connectionSchema>) {
         } else if (err.code === 'ENOCONNECTION') {
             errorMessage = 'Cannot connect to the server. Please check the Server IP.';
         } else if (err.message && err.message.includes('Invalid object name')) {
-            errorMessage = `Could not find the table in your query. Please check your SQL query in src/lib/queries.ts.`;
+             if (err.message.includes('sys_branch')) {
+                errorMessage = `Could not find the 'sys_branch' table. Please check your database.`;
+            } else {
+                errorMessage = `Could not find a table in your query. Please check your SQL query in src/lib/queries.ts.`;
+            }
         }
         
         return { success: false, message: errorMessage, branches: [] };

@@ -53,7 +53,7 @@ export function ClientForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFetchingBranches, setIsFetchingBranches] = useState(false);
-  const [branches, setBranches] = useState<string[]>([]);
+  const [branches, setBranches] = useState<{ value: string; label: string; }[]>([]);
   const [branchesFetched, setBranchesFetched] = useState(false);
   const [activeAccordion, setActiveAccordion] = useState<string>('item-1');
 
@@ -120,10 +120,17 @@ export function ClientForm() {
         title: 'Success!',
         description: result.message,
       });
-      form.resetField('cardNumber');
-      form.resetField('customerName');
-      form.resetField('phoneNumber');
-      form.resetField('gender');
+      const currentValues = form.getValues();
+      form.reset({
+        serverIp: currentValues.serverIp,
+        username: currentValues.username,
+        password: currentValues.password,
+        database: currentValues.database,
+        branch: currentValues.branch,
+        cardNumber: '',
+        customerName: '',
+        phoneNumber: '',
+      });
     } else {
       toast({
         variant: 'destructive',
@@ -252,7 +259,7 @@ export function ClientForm() {
                                         </FormControl>
                                         <SelectContent>
                                             {branches.length > 0 ? (
-                                                branches.map(branch => <SelectItem key={branch} value={branch}>{branch}</SelectItem>)
+                                                branches.map(branch => <SelectItem key={branch.value} value={branch.value}>{branch.label}</SelectItem>)
                                             ) : (
                                                 <SelectItem value="placeholder" disabled>
                                                     {branchesFetched ? "No branches found" : "Fetch branches first"}
