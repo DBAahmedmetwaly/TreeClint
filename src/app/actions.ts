@@ -3,39 +3,34 @@
 import { z } from 'zod';
 
 const formSchema = z.object({
-  cardNumber: z.string().refine((val) => /^\d{16}$/.test(val), {
-    message: 'Card number must be 16 digits.',
+  serverIp: z.string().min(1, { message: 'Server IP is required.' }),
+  username: z.string().min(1, { message: 'Username is required.' }),
+  password: z.string().optional(),
+  database: z.string().min(1, { message: 'Database name is required.' }),
+  branch: z.string({
+    required_error: 'You need to select a branch.',
   }),
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  phone: z.string().refine((val) => /^\+?[1-9]\d{1,14}$/.test(val), {
-    message: 'Invalid phone number format.',
-  }),
-  customerType: z.enum(['individual', 'business']),
 });
 
-export async function updateClientData(data: z.infer<typeof formSchema>) {
+
+export async function saveConnectionDetails(data: z.infer<typeof formSchema>) {
   const parsedData = formSchema.safeParse(data);
 
   if (!parsedData.success) {
+    // The client-side validation should prevent this, but it's good practice
+    // to have server-side validation as well.
     return { success: false, message: 'Invalid data provided.' };
   }
 
   // Simulate network delay and database operation
   await new Promise(resolve => setTimeout(resolve, 1500));
 
-  console.log('Simulating update for client data:', parsedData.data);
+  console.log('Simulating saving connection details:', parsedData.data);
 
-  // In a real application, you would connect to your SQL server and
-  // execute an UPDATE or INSERT statement here.
-  // Example:
-  // try {
-  //   // const connection = await connectToSqlServer();
-  //   // await connection.query`UPDATE Clients SET Name = ${parsedData.data.name}, Phone = ${parsedData.data.phone}, Type = ${parsedData.data.customerType} WHERE CardNumber = ${parsedData.data.cardNumber}`;
-  //   return { success: true, message: `Client ${parsedData.data.name} updated.` };
-  // } catch (error) {
-  //   console.error('Database error:', error);
-  //   return { success: false, message: 'Failed to update data in the database.' };
-  // }
+  // In a real app, you would use these details to connect to the SQL server
+  // and then fetch the list of branches.
+  // For security reasons, sensitive data like passwords should be handled
+  // with care and not stored insecurely.
 
-  return { success: true, message: `Client ${parsedData.data.name} has been registered.` };
+  return { success: true, message: `Connection details received for server ${parsedData.data.serverIp}.` };
 }

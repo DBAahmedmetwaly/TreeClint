@@ -6,6 +6,7 @@ import * as z from 'zod';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,21 +22,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreditCard, Phone, User, Users, Loader2 } from 'lucide-react';
-import { updateClientData } from '@/app/actions';
+import { Server, User, KeyRound, Database, GitBranch, Loader2 } from 'lucide-react';
+import { saveConnectionDetails } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 
 const formSchema = z.object({
-  cardNumber: z.string().length(16, {
-    message: 'Card number must be exactly 16 digits.',
-  }).regex(/^\d+$/, { message: "Card number must only contain digits." }),
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }).max(50, { message: 'Name must not exceed 50 characters.' }),
-  phone: z.string().regex(/^\+?[1-9]\d{7,14}$/, {
-    message: 'Please enter a valid phone number.',
-  }),
-  customerType: z.enum(['individual', 'business'], {
-    required_error: 'You need to select a customer type.',
+  serverIp: z.string().min(1, { message: 'Server IP is required.' }),
+  username: z.string().min(1, { message: 'Username is required.' }),
+  password: z.string().optional(),
+  database: z.string().min(1, { message: 'Database name is required.' }),
+  branch: z.string({
+    required_error: 'You need to select a branch.',
   }),
 });
 
@@ -46,15 +44,16 @@ export function ClientForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      cardNumber: '',
-      name: '',
-      phone: '',
+      serverIp: '',
+      username: '',
+      password: '',
+      database: '',
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    const result = await updateClientData(values);
+    const result = await saveConnectionDetails(values);
     setIsSubmitting(false);
 
     if (result.success) {
@@ -63,7 +62,6 @@ export function ClientForm() {
         description: result.message,
         className: 'bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700',
       });
-      form.reset();
     } else {
       toast({
         variant: 'destructive',
@@ -76,22 +74,22 @@ export function ClientForm() {
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle className="font-headline text-2xl text-center">Client Data Manager</CardTitle>
-        <CardDescription className="text-center">Enter customer details to register or update their information.</CardDescription>
+        <CardTitle className="font-headline text-2xl text-center">SQL Server Configuration</CardTitle>
+        <CardDescription className="text-center">Enter your SQL Server connection details and select a branch.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="cardNumber"
+              name="serverIp"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Card Number</FormLabel>
+                  <FormLabel>Server IP</FormLabel>
                   <div className="relative">
-                    <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Server className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <FormControl>
-                      <Input placeholder="0000 0000 0000 0000" {...field} className="pl-10" />
+                      <Input placeholder="e.g., 192.168.1.1" {...field} className="pl-10" />
                     </FormControl>
                   </div>
                   <FormMessage />
@@ -100,14 +98,14 @@ export function ClientForm() {
             />
             <FormField
               control={form.control}
-              name="name"
+              name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full Name</FormLabel>
+                  <FormLabel>Username</FormLabel>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} className="pl-10" />
+                      <Input placeholder="e.g., sa" {...field} className="pl-10" />
                     </FormControl>
                   </div>
                   <FormMessage />
@@ -116,14 +114,14 @@ export function ClientForm() {
             />
             <FormField
               control={form.control}
-              name="phone"
+              name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
+                  <FormLabel>Password</FormLabel>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <FormControl>
-                      <Input placeholder="+1 234 567 8900" {...field} className="pl-10" />
+                      <Input type="password" {...field} className="pl-10" />
                     </FormControl>
                   </div>
                   <FormMessage />
@@ -132,24 +130,44 @@ export function ClientForm() {
             />
              <FormField
               control={form.control}
-              name="customerType"
+              name="database"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Customer Type</FormLabel>
+                  <FormLabel>Database Name</FormLabel>
                   <div className="relative">
-                     <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
+                     <Database className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <FormControl>
+                      <Input placeholder="e.g., MyDatabase" {...field} className="pl-10" />
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="branch"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Branch Name</FormLabel>
+                  <div className="relative">
+                     <GitBranch className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className="pl-10">
-                          <SelectValue placeholder="Select a customer type" />
+                          <SelectValue placeholder="Select a branch" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="individual">Individual</SelectItem>
-                        <SelectItem value="business">Business</SelectItem>
+                        <SelectItem value="main_branch">Main Branch</SelectItem>
+                        <SelectItem value="branch_one">Branch One</SelectItem>
+                        <SelectItem value="branch_two">Branch Two</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
+                   <FormDescription>
+                    The branch list would be populated from your database.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -162,10 +180,10 @@ export function ClientForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  Saving...
                 </>
               ) : (
-                'Submit Data'
+                'Save Connection'
               )}
             </Button>
           </form>
