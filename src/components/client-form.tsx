@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Server, User, KeyRound, Database, GitBranch, Loader2, CreditCard, Phone, Users, Network, Settings } from 'lucide-react';
+import { Server, User, KeyRound, Database, GitBranch, Loader2, CreditCard, Phone, Users, Settings, TreeDeciduous } from 'lucide-react';
 import { submitClientData, getBranches } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
@@ -147,98 +147,100 @@ export function ClientForm() {
     <Form {...form}>
       <Card className="shadow-2xl w-full border-2">
         <CardHeader>
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Network className="h-8 w-8 text-primary"/>
+             <div className="relative">
+                <div className="absolute top-0 right-0">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <Settings className="h-6 w-6" />
+                                <span className="sr-only">إعدادات الاتصال</span>
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>إعدادات الاتصال</DialogTitle>
+                                <DialogDescription>
+                                    قم بتعديل تفاصيل الاتصال هنا. سيتم استخدام هذه الإعدادات عند الضغط على زر "جلب الفروع".
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <FormField
+                                    control={form.control}
+                                    name="serverIp"
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>عنوان IP الخاص بالخادم</FormLabel>
+                                        <div className="relative">
+                                        <Server className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                        <FormControl>
+                                            <Input type="password" {...field} className="pr-10" />
+                                        </FormControl>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="username"
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>اسم المستخدم</FormLabel>
+                                        <div className="relative">
+                                        <User className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                        <FormControl>
+                                            <Input type="password" {...field} className="pr-10" />
+                                        </FormControl>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="password"
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>كلمة المرور</FormLabel>
+                                        <div className="relative">
+                                        <KeyRound className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                        <FormControl>
+                                            <Input type="password" {...field} className="pr-10" />
+                                        </FormControl>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="database"
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>اسم قاعدة البيانات</FormLabel>
+                                        <div className="relative">
+                                        <Database className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                        <FormControl>
+                                            <Input type="password" {...field} className="pr-10" />
+                                        </FormControl>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button type="button">إغلاق</Button>
+                                </DialogClose>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+                <div className="flex flex-col items-center gap-2 pt-4 text-center">
+                    <TreeDeciduous className="h-16 w-16 text-primary" />
                     <CardTitle className="font-headline text-3xl">إدخال بيانات عملاء تري</CardTitle>
                 </div>
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                            <Settings className="h-6 w-6" />
-                            <span className="sr-only">إعدادات الاتصال</span>
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>إعدادات الاتصال</DialogTitle>
-                            <DialogDescription>
-                                قم بتعديل تفاصيل الاتصال هنا. سيتم استخدام هذه الإعدادات عند الضغط على زر "جلب الفروع".
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <FormField
-                                control={form.control}
-                                name="serverIp"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>عنوان IP الخاص بالخادم</FormLabel>
-                                    <div className="relative">
-                                    <Server className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <FormControl>
-                                        <Input type="password" {...field} className="pr-10" />
-                                    </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="username"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>اسم المستخدم</FormLabel>
-                                    <div className="relative">
-                                    <User className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <FormControl>
-                                        <Input type="password" {...field} className="pr-10" />
-                                    </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="password"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>كلمة المرور</FormLabel>
-                                    <div className="relative">
-                                    <KeyRound className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <FormControl>
-                                        <Input type="password" {...field} className="pr-10" />
-                                    </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="database"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>اسم قاعدة البيانات</FormLabel>
-                                    <div className="relative">
-                                    <Database className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <FormControl>
-                                        <Input type="password" {...field} className="pr-10" />
-                                    </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-                        </div>
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button type="button">إغلاق</Button>
-                            </DialogClose>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
             </div>
             <CardDescription className="text-center pt-2">انقر على الترس لتعديل الإعدادات، ثم قم بجلب الفروع لتسجيل العملاء.</CardDescription>
         </CardHeader>
