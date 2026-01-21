@@ -3,6 +3,7 @@
 
 import { z } from 'zod';
 import sql from 'mssql';
+import { GET_BRANCHES_QUERY } from '@/lib/queries';
 
 const formSchema = z.object({
   serverIp: z.string().min(1, { message: 'Server IP is required.' }),
@@ -61,10 +62,8 @@ export async function getBranches(data: z.infer<typeof connectionSchema>) {
     try {
         await sql.connect(config);
         
-        // This is where you enter the SQL query to get your branches.
-        // Replace 'YourBranchTable' with the actual name of your table
-        // and 'name' with the column containing the branch name.
-        const result = await sql.query`SELECT name FROM YourBranchTable;`; 
+        // This query is now managed in src/lib/queries.ts
+        const result = await sql.query(GET_BRANCHES_QUERY); 
 
         await sql.close();
 
@@ -88,7 +87,7 @@ export async function getBranches(data: z.infer<typeof connectionSchema>) {
         } else if (err.code === 'ENOCONNECTION') {
             errorMessage = 'Cannot connect to the server. Please check the Server IP.';
         } else if (err.message && err.message.includes('Invalid object name')) {
-            errorMessage = `Could not find the table in your query. Please check your SQL query in src/app/actions.ts.`;
+            errorMessage = `Could not find the table in your query. Please check your SQL query in src/lib/queries.ts.`;
         }
         
         return { success: false, message: errorMessage, branches: [] };

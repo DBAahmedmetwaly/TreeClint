@@ -48,10 +48,10 @@ export function ClientForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      serverIp: '',
-      username: '',
-      password: '',
-      database: '',
+      serverIp: '10.174.8.5',
+      username: 'mobile',
+      password: 'metoomar@123',
+      database: 'retail_t',
       branch: '',
     },
   });
