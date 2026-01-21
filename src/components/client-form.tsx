@@ -23,10 +23,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Server, User, KeyRound, Database, GitBranch, Loader2 } from 'lucide-react';
-import { saveConnectionDetails, getBranches } from '@/app/actions';
+import { Server, User, KeyRound, Database, GitBranch, Loader2, CreditCard, Phone, Users } from 'lucide-react';
+import { submitClientData, getBranches } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { Separator } from './ui/separator';
 
 const formSchema = z.object({
   serverIp: z.string().min(1, { message: 'Server IP is required.' }),
@@ -36,6 +37,10 @@ const formSchema = z.object({
   branch: z.string({
     required_error: 'You need to select a branch.',
   }).min(1, { message: "Please select a branch." }),
+  cardNumber: z.string().regex(/^\d+$/, { message: "Card number must contain only digits." }).min(1, { message: "Card Number is required." }),
+  customerName: z.string().min(1, { message: "Customer name is required." }),
+  phoneNumber: z.string().min(1, { message: "Phone number is required." }),
+  gender: z.enum(['1', '2'], { required_error: 'Please select a gender.' }),
 });
 
 export function ClientForm() {
@@ -48,21 +53,24 @@ export function ClientForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      serverIp: '10.174.8.5',
+      serverIp: '10.174.8.6',
       username: 'mobile',
-      password: 'metoomar@123',
+      password: 'meto@omar123',
       database: 'retail_t',
       branch: '',
+      cardNumber: '',
+      customerName: '',
+      phoneNumber: '',
     },
   });
 
   const handleFetchBranches = async () => {
-    const isValid = await form.trigger(['serverIp', 'username', 'database']);
+    const isValid = await form.trigger(['serverIp', 'username', 'database', 'password']);
     if (!isValid) {
         toast({
             variant: 'destructive',
             title: 'Missing Details',
-            description: 'Please fill in server, username, and database fields.',
+            description: 'Please fill in server, username, database, and password fields.',
         });
         return;
     }
@@ -95,7 +103,7 @@ export function ClientForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    const result = await saveConnectionDetails(values);
+    const result = await submitClientData(values);
     setIsSubmitting(false);
 
     if (result.success) {
@@ -103,6 +111,10 @@ export function ClientForm() {
         title: 'Success!',
         description: result.message,
       });
+      form.resetField('cardNumber');
+      form.resetField('customerName');
+      form.resetField('phoneNumber');
+      form.resetField('gender');
     } else {
       toast({
         variant: 'destructive',
@@ -115,8 +127,8 @@ export function ClientForm() {
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle className="font-headline text-2xl text-center">SQL Server Configuration</CardTitle>
-        <CardDescription className="text-center">Enter connection details to fetch branches from your database.</CardDescription>
+        <CardTitle className="font-headline text-2xl text-center">Client Data Manager</CardTitle>
+        <CardDescription className="text-center">Enter client details to update their record in the database.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -160,7 +172,7 @@ export function ClientForm() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password (optional)</FormLabel>
+                    <FormLabel>Password</FormLabel>
                     <div className="relative">
                       <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                       <FormControl>
@@ -236,6 +248,86 @@ export function ClientForm() {
                 </FormItem>
               )}
             />
+
+            <Separator />
+            
+            <div className="space-y-4">
+               <h3 className="text-lg font-medium">Client Details</h3>
+                <FormField
+                    control={form.control}
+                    name="cardNumber"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Card Number</FormLabel>
+                        <div className="relative">
+                        <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                            <Input placeholder="e.g., 12345" {...field} className="pl-10" />
+                        </FormControl>
+                        </div>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="customerName"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Customer Name</FormLabel>
+                        <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                            <Input placeholder="e.g., John Doe" {...field} className="pl-10" />
+                        </FormControl>
+                        </div>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                            <Input placeholder="e.g., 555-1234" {...field} className="pl-10" />
+                        </FormControl>
+                        </div>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Gender</FormLabel>
+                        <div className="relative">
+                            <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
+                            <Select onValueChange={field.onChange} value={field.value || ''} >
+                            <FormControl>
+                                <SelectTrigger className="pl-10">
+                                <SelectValue placeholder="Select a gender" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="1">Male</SelectItem>
+                                <SelectItem value="2">Female</SelectItem>
+                            </SelectContent>
+                            </Select>
+                        </div>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
+
+
             <Button 
               type="submit" 
               className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
@@ -244,10 +336,10 @@ export function ClientForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  Saving Client Data...
                 </>
               ) : (
-                'Save Connection'
+                'Save Client Data'
               )}
             </Button>
           </form>

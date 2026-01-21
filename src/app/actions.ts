@@ -3,9 +3,9 @@
 
 import { z } from 'zod';
 import sql from 'mssql';
-import { GET_BRANCHES_QUERY } from '@/lib/queries';
+import { GET_BRANCHES_QUERY, UPDATE_CUSTOMER_QUERY } from '@/lib/queries';
 
-const formSchema = z.object({
+const clientFormSchema = z.object({
   serverIp: z.string().min(1, { message: 'Server IP is required.' }),
   username: z.string().min(1, { message: 'Username is required.' }),
   password: z.string().optional(),
@@ -13,23 +13,77 @@ const formSchema = z.object({
   branch: z.string({
     required_error: 'You need to select a branch.',
   }).min(1, { message: 'You need to select a branch.' }),
+  cardNumber: z.string().min(1, { message: 'Card number is required.' }),
+  customerName: z.string().min(1, { message: 'Customer name is required.' }),
+  phoneNumber: z.string().min(1, { message: 'Phone number is required.' }),
+  gender: z.enum(['1', '2'], { required_error: 'Gender is required.' }),
 });
 
 
-export async function saveConnectionDetails(data: z.infer<typeof formSchema>) {
-  const parsedData = formSchema.safeParse(data);
+export async function submitClientData(data: z.infer<typeof clientFormSchema>) {
+    const parsedData = clientFormSchema.safeParse(data);
 
-  if (!parsedData.success) {
-    return { success: false, message: 'Invalid data provided.' };
-  }
+    if (!parsedData.success) {
+        return { success: false, message: 'Invalid data provided.' };
+    }
+    
+    const {
+        serverIp,
+        username,
+        password,
+        database,
+        branch,
+        cardNumber,
+        customerName,
+        phoneNumber,
+        gender
+    } = parsedData.data;
 
-  // Simulate network delay and database operation
-  await new Promise(resolve => setTimeout(resolve, 1500));
+    const config = {
+        user: username,
+        password: password,
+        server: serverIp,
+        database: database,
+        options: {
+            encrypt: process.env.NODE_ENV === 'production',
+            trustServerCertificate: process.env.NODE_ENV !== 'production'
+        }
+    };
 
-  console.log('Simulating saving connection details:', parsedData.data);
+    try {
+        await sql.connect(config);
+        const request = new sql.Request();
+        
+        request.input('cardNumber', sql.Int, parseInt(cardNumber, 10));
+        request.input('branchName', sql.NVarChar, branch);
+        request.input('customerName', sql.NVarChar, customerName);
+        request.input('gender', sql.VarChar, gender);
+        request.input('phoneNumber', sql.VarChar, phoneNumber);
 
-  return { success: true, message: `Connection for branch ${parsedData.data.branch} on server ${parsedData.data.serverIp} saved.` };
+        const result = await request.query(UPDATE_CUSTOMER_QUERY);
+
+        await sql.close();
+        
+        const message = result.recordset[0]?.message || 'No message returned from database.';
+        if (message.includes('success')) {
+            return { success: true, message: `Customer ${customerName} (Card: ${cardNumber}) updated successfully.` };
+        } else {
+            return { success: false, message: `Failed to update customer: ${message}` };
+        }
+
+    } catch (err: any) {
+        console.error(err);
+        if (sql.connected) {
+            await sql.close();
+        }
+        let errorMessage = 'An error occurred during the database operation.';
+        if (err.message) {
+            errorMessage = err.message;
+        }
+        return { success: false, message: errorMessage };
+    }
 }
+
 
 const connectionSchema = z.object({
   serverIp: z.string().min(1, { message: 'Server IP is required.' }),
@@ -62,7 +116,6 @@ export async function getBranches(data: z.infer<typeof connectionSchema>) {
     try {
         await sql.connect(config);
         
-        // This query is now managed in src/lib/queries.ts
         const result = await sql.query(GET_BRANCHES_QUERY); 
 
         await sql.close();
