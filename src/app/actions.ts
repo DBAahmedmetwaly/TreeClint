@@ -4,6 +4,7 @@
 import { z } from 'zod';
 import sql from 'mssql';
 import { GET_BRANCHES_QUERY, UPDATE_CUSTOMER_QUERY } from '@/lib/queries';
+import { getDbPool } from '@/lib/db';
 
 const clientFormSchema = z.object({
   serverIp: z.string().min(1, { message: 'عنوان IP الخاص بالخادم مطلوب.' }),
@@ -51,8 +52,8 @@ export async function submitClientData(data: z.infer<typeof clientFormSchema>) {
     };
 
     try {
-        await sql.connect(config);
-        const request = new sql.Request();
+        const pool = await getDbPool(config);
+        const request = pool.request();
         
         request.input('cardNumber', sql.Int, parseInt(cardNumber, 10));
         request.input('branchName', sql.NVarChar, branch);
@@ -61,8 +62,6 @@ export async function submitClientData(data: z.infer<typeof clientFormSchema>) {
         request.input('phoneNumber', sql.VarChar, phoneNumber);
 
         const result = await request.query(UPDATE_CUSTOMER_QUERY);
-
-        await sql.close();
         
         const message = result.recordset[0]?.message || 'لم يتم إرجاع رسالة من قاعدة البيانات.';
         if (message.includes('بنجاح')) {
@@ -73,9 +72,6 @@ export async function submitClientData(data: z.infer<typeof clientFormSchema>) {
 
     } catch (err: any) {
         console.error(err);
-        if (sql.connected) {
-            await sql.close();
-        }
         let errorMessage = 'حدث خطأ أثناء عملية قاعدة البيانات.';
         if (err.message) {
             errorMessage = err.message;
@@ -114,11 +110,9 @@ export async function getBranches(data: z.infer<typeof connectionSchema>) {
     };
 
     try {
-        await sql.connect(config);
+        const pool = await getDbPool(config);
         
-        const result = await sql.query(GET_BRANCHES_QUERY); 
-
-        await sql.close();
+        const result = await pool.query(GET_BRANCHES_QUERY); 
 
         const branches = result.recordset.map((row: any) => ({
             value: row.branch,
@@ -133,9 +127,6 @@ export async function getBranches(data: z.infer<typeof connectionSchema>) {
 
     } catch (err: any) {
         console.error(err);
-        if (sql.connected) {
-            await sql.close();
-        }
         
         let errorMessage = 'فشل الاتصال أو جلب البيانات. يرجى التحقق من تفاصيل الاتصال والاستعلام.';
         if (err.code === 'ELOGIN') {
