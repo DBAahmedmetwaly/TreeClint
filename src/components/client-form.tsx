@@ -142,161 +142,245 @@ export function ClientForm() {
   }
 
   return (
-    <Card className="shadow-2xl w-full border-2">
-      <CardHeader>
-        <div className="flex items-center justify-center gap-3 relative">
-            <Network className="h-8 w-8 text-primary"/>
-            <CardTitle className="font-headline text-3xl text-center">مدير عملاء تري للملابس</CardTitle>
-        </div>
-        <CardDescription className="text-center pt-2">أدخل تفاصيل الاتصال، ثم قم بتسجيل أو تحديث بيانات العميل.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            
-            <Button 
-                type="button" 
-                onClick={handleFetchBranches}
-                className="w-full"
-                disabled={isFetchingBranches}
-            >
-                {isFetchingBranches ? (
-                <>
-                    <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                    جاري جلب الفروع...
-                </>
-                ) : (
-                '1. جلب الفروع'
-                )}
-            </Button>
-            
-            <Separator />
-            
-            <fieldset className="space-y-4" disabled={!branchesFetched}>
-                <p className="text-xl font-semibold text-center">2. تسجيل العميل</p>
-                 <FormField
-                    control={form.control}
-                    name="branch"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>اسم الفرع</FormLabel>
-                        <div className="relative">
-                            <GitBranch className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
-                            <Select onValueChange={field.onChange} value={field.value || ''} disabled={!branchesFetched}>
-                            <FormControl>
-                                <SelectTrigger className="pr-10">
-                                <SelectValue placeholder="اختر فرعًا بعد جلبه" />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                {branches.length > 0 ? (
-                                    branches.map(branch => <SelectItem key={branch.value} value={branch.value}>{branch.label}</SelectItem>)
-                                ) : (
-                                    <SelectItem value="placeholder" disabled>
-                                        {branchesFetched ? "لم يتم العثور على فروع" : "قم بجلب الفروع أولاً"}
-                                    </SelectItem>
+    <Form {...form}>
+      <Card className="shadow-2xl w-full border-2">
+        <CardHeader>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <Network className="h-8 w-8 text-primary"/>
+                    <CardTitle className="font-headline text-3xl">مدير عملاء تري للملابس</CardTitle>
+                </div>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <Settings className="h-6 w-6" />
+                            <span className="sr-only">إعدادات الاتصال</span>
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>إعدادات الاتصال</DialogTitle>
+                            <DialogDescription>
+                                أدخل تفاصيل الاتصال بقاعدة بيانات SQL Server. هذه القيم مخفية للحماية.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <FormField
+                                control={form.control}
+                                name="serverIp"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>عنوان IP الخاص بالخادم</FormLabel>
+                                    <div className="relative">
+                                    <Server className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                    <FormControl>
+                                        <Input type="password" {...field} className="pr-10" />
+                                    </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
                                 )}
-                            </SelectContent>
-                            </Select>
+                            />
+                            <FormField
+                                control={form.control}
+                                name="username"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>اسم المستخدم</FormLabel>
+                                    <div className="relative">
+                                    <User className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                    <FormControl>
+                                        <Input type="password" {...field} className="pr-10" />
+                                    </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>كلمة المرور</FormLabel>
+                                    <div className="relative">
+                                    <KeyRound className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                    <FormControl>
+                                        <Input type="password" {...field} className="pr-10" />
+                                    </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="database"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>اسم قاعدة البيانات</FormLabel>
+                                    <div className="relative">
+                                    <Database className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                    <FormControl>
+                                        <Input type="password" {...field} className="pr-10" />
+                                    </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
                         </div>
-                        <FormDescription>
-                            يتم ملء قائمة الفروع من قاعدة بياناتك.
-                        </FormDescription>
-                        <FormMessage />
-                        </FormItem>
+                    </DialogContent>
+                </Dialog>
+            </div>
+            <CardDescription className="text-center pt-2">انقر على الترس لتعديل الإعدادات، ثم قم بجلب الفروع لتسجيل العملاء.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                
+                <Button 
+                    type="button" 
+                    onClick={handleFetchBranches}
+                    className="w-full"
+                    disabled={isFetchingBranches}
+                >
+                    {isFetchingBranches ? (
+                    <>
+                        <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                        جاري جلب الفروع...
+                    </>
+                    ) : (
+                    '1. جلب الفروع'
                     )}
-                    />
-                 <FormField
-                    control={form.control}
-                    name="cardNumber"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>رقم الكارت</FormLabel>
-                        <div className="relative">
-                        <CreditCard className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                            <Input placeholder="مثال: 12345" {...field} className="pr-10" />
-                        </FormControl>
-                        </div>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="customerName"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>اسم العميل</FormLabel>
-                        <div className="relative">
-                        <User className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                            <Input placeholder="مثال: جون دو" {...field} className="pr-10" />
-                        </FormControl>
-                        </div>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="phoneNumber"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>رقم الهاتف</FormLabel>
-                        <div className="relative">
-                        <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                            <Input placeholder="مثال: 555-1234" {...field} className="pr-10" />
-                        </FormControl>
-                        </div>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="gender"
-                    render={({ field }) => (
+                </Button>
+                
+                <Separator />
+                
+                <fieldset className="space-y-4" disabled={!branchesFetched}>
+                    <p className="text-xl font-semibold text-center">2. تسجيل العميل</p>
+                    <FormField
+                        control={form.control}
+                        name="branch"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>اسم الفرع</FormLabel>
+                            <div className="relative">
+                                <GitBranch className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
+                                <Select onValueChange={field.onChange} value={field.value || ''} disabled={!branchesFetched}>
+                                <FormControl>
+                                    <SelectTrigger className="pr-10">
+                                    <SelectValue placeholder="اختر فرعًا بعد جلبه" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {branches.length > 0 ? (
+                                        branches.map(branch => <SelectItem key={branch.value} value={branch.value}>{branch.label}</SelectItem>)
+                                    ) : (
+                                        <SelectItem value="placeholder" disabled>
+                                            {branchesFetched ? "لم يتم العثور على فروع" : "قم بجلب الفروع أولاً"}
+                                        </SelectItem>
+                                    )}
+                                </SelectContent>
+                                </Select>
+                            </div>
+                            <FormDescription>
+                                يتم ملء قائمة الفروع من قاعدة بياناتك.
+                            </FormDescription>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    <FormField
+                        control={form.control}
+                        name="cardNumber"
+                        render={({ field }) => (
                         <FormItem>
-                        <FormLabel>الجنس</FormLabel>
-                        <div className="relative">
-                            <Users className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
-                            <Select onValueChange={field.onChange} value={field.value || ''} >
+                            <FormLabel>رقم الكارت</FormLabel>
+                            <div className="relative">
+                            <CreditCard className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <FormControl>
-                                <SelectTrigger className="pr-10">
-                                <SelectValue placeholder="اختر الجنس" />
-                                </SelectTrigger>
+                                <Input placeholder="مثال: 12345" {...field} className="pr-10" />
                             </FormControl>
-                            <SelectContent>
-                                <SelectItem value="1">ذكر</SelectItem>
-                                <SelectItem value="2">أنثى</SelectItem>
-                            </SelectContent>
-                            </Select>
-                        </div>
-                        <FormMessage />
+                            </div>
+                            <FormMessage />
                         </FormItem>
-                    )}
-                />
-            </fieldset>
-            
-            <Button 
-              type="submit" 
-              className="w-full text-lg py-6"
-              disabled={isSubmitting || !branchesFetched}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                  جاري حفظ بيانات العميل...
-                </>
-              ) : (
-                'حفظ بيانات العميل'
-              )}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="customerName"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>اسم العميل</FormLabel>
+                            <div className="relative">
+                            <User className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <FormControl>
+                                <Input placeholder="مثال: جون دو" {...field} className="pr-10" />
+                            </FormControl>
+                            </div>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>رقم الهاتف</FormLabel>
+                            <div className="relative">
+                            <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <FormControl>
+                                <Input placeholder="مثال: 555-1234" {...field} className="pr-10" />
+                            </FormControl>
+                            </div>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="gender"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>الجنس</FormLabel>
+                            <div className="relative">
+                                <Users className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
+                                <Select onValueChange={field.onChange} value={field.value || ''} >
+                                <FormControl>
+                                    <SelectTrigger className="pr-10">
+                                    <SelectValue placeholder="اختر الجنس" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="1">ذكر</SelectItem>
+                                    <SelectItem value="2">أنثى</SelectItem>
+                                </SelectContent>
+                                </Select>
+                            </div>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </fieldset>
+                
+                <Button 
+                type="submit" 
+                className="w-full text-lg py-6"
+                disabled={isSubmitting || !branchesFetched}
+                >
+                {isSubmitting ? (
+                    <>
+                    <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                    جاري حفظ بيانات العميل...
+                    </>
+                ) : (
+                    'حفظ بيانات العميل'
+                )}
+                </Button>
+            </form>
+        </CardContent>
+      </Card>
+    </Form>
   );
 }
