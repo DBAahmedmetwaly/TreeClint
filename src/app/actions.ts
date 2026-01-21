@@ -48,7 +48,9 @@ export async function submitClientData(data: z.infer<typeof clientFormSchema>) {
         options: {
             encrypt: process.env.NODE_ENV === 'production',
             trustServerCertificate: process.env.NODE_ENV !== 'production'
-        }
+        },
+        connectionTimeout: 15000,
+        requestTimeout: 15000,
     };
 
     try {
@@ -73,7 +75,9 @@ export async function submitClientData(data: z.infer<typeof clientFormSchema>) {
     } catch (err: any) {
         console.error(err);
         let errorMessage = 'حدث خطأ أثناء عملية قاعدة البيانات.';
-        if (err.message) {
+        if (err.code === 'ETIMEOUT') {
+            errorMessage = 'انتهت مهلة حفظ البيانات. قد تكون الشبكة ضعيفة. حاول مرة أخرى.';
+        } else if (err.message) {
             errorMessage = err.message;
         }
         return { success: false, message: errorMessage };
@@ -106,7 +110,9 @@ export async function getBranches(data: z.infer<typeof connectionSchema>) {
         options: {
             encrypt: process.env.NODE_ENV === 'production',
             trustServerCertificate: process.env.NODE_ENV !== 'production'
-        }
+        },
+        connectionTimeout: 15000,
+        requestTimeout: 15000,
     };
 
     try {
@@ -133,6 +139,8 @@ export async function getBranches(data: z.infer<typeof connectionSchema>) {
             errorMessage = 'فشل تسجيل الدخول. يرجى التحقق من اسم المستخدم وكلمة المرور.';
         } else if (err.code === 'ENOCONNECTION') {
             errorMessage = 'لا يمكن الاتصال بالخادم. يرجى التحقق من IP السيرفر.';
+        } else if (err.code === 'ETIMEOUT') {
+            errorMessage = 'انتهت مهلة الاتصال بالخادم. قد تكون الشبكة ضعيفة. حاول مرة أخرى.';
         } else if (err.message && err.message.includes('Invalid object name')) {
              if (err.message.includes('sys_branch')) {
                 errorMessage = `تعذر العثور على جدول 'sys_branch'. يرجى التحقق من قاعدة بياناتك.`;
