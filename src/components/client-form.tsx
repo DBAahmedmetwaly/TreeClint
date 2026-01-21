@@ -23,10 +23,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Server, User, KeyRound, Database, GitBranch, Loader2, CreditCard, Phone, Users, Settings, TreeDeciduous } from 'lucide-react';
+import { Server, User, KeyRound, Database, GitBranch, Loader2, CreditCard, Phone, Users, Settings, TreeDeciduous, History, Trash2 } from 'lucide-react';
 import { submitClientData, getBranches } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -37,6 +37,15 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { Separator } from '@/components/ui/separator';
 
 
@@ -54,12 +63,32 @@ const formSchema = z.object({
   gender: z.enum(['1', '2'], { required_error: 'الرجاء اختيار الجنس.' }),
 });
 
+type LogEntry = {
+  cardNumber: string;
+  customerName: string;
+  timestamp: string;
+};
+
+
 export function ClientForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFetchingBranches, setIsFetchingBranches] = useState(false);
   const [branches, setBranches] = useState<{ value: string; label: string; }[]>([]);
   const [branchesFetched, setBranchesFetched] = useState(false);
+  const [history, setHistory] = useState<LogEntry[]>([]);
+
+  useEffect(() => {
+    try {
+      const savedHistory = localStorage.getItem('customerHistory');
+      if (savedHistory) {
+        setHistory(JSON.parse(savedHistory));
+      }
+    } catch (error) {
+      console.error("Failed to load history from localStorage", error);
+      localStorage.removeItem('customerHistory');
+    }
+  }, []);
 
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -123,6 +152,29 @@ export function ClientForm() {
         title: 'نجاح!',
         description: result.message,
       });
+
+      const newEntry: LogEntry = {
+          cardNumber: values.cardNumber,
+          customerName: values.customerName,
+          timestamp: new Date().toISOString(),
+      };
+
+      setHistory(prevHistory => {
+          const updatedHistory = [newEntry, ...prevHistory];
+          try {
+            localStorage.setItem('customerHistory', JSON.stringify(updatedHistory));
+          } catch (error) {
+             console.error("Failed to save history to localStorage", error);
+             toast({
+              variant: 'destructive',
+              title: 'خطأ',
+              description: 'لم نتمكن من حفظ هذا الإدخال في السجل المحلي.',
+            });
+          }
+          return updatedHistory;
+      });
+
+
       const currentValues = form.getValues();
       form.reset({
         serverIp: currentValues.serverIp,
@@ -148,7 +200,56 @@ export function ClientForm() {
     <Form {...form}>
       <Card className="shadow-2xl w-full border-2">
         <CardHeader>
-             <div className="relative">
+            <div className="relative">
+                <div className="absolute top-0 left-0">
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <History className="h-6 w-6" />
+                                <span className="sr-only">سجل الإدخالات</span>
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent className="flex flex-col" side="left">
+                            <SheetHeader>
+                                <SheetTitle>سجل الإدخالات</SheetTitle>
+                                <SheetDescription>
+                                    قائمة بالعملاء الذين تم تسجيلهم من هذا الجهاز.
+                                </SheetDescription>
+                            </SheetHeader>
+                            <div className="flex-grow overflow-y-auto py-4">
+                                {history.length > 0 ? (
+                                <ul className="space-y-4">
+                                    {history.map((entry, index) => (
+                                    <li key={index} className="border-b pb-3">
+                                        <p className="font-semibold">{entry.customerName}</p>
+                                        <p className="text-sm text-muted-foreground">رقم الكارت: {entry.cardNumber}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                        {new Date(entry.timestamp).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}
+                                        </p>
+                                    </li>
+                                    ))}
+                                </ul>
+                                ) : (
+                                <div className="flex h-full items-center justify-center">
+                                    <p className="text-center text-muted-foreground mt-8">لا توجد إدخالات مسجلة.</p>
+                                </div>
+                                )}
+                            </div>
+                            <SheetFooter>
+                                {history.length > 0 && (
+                                    <Button variant="outline" onClick={() => {
+                                        setHistory([]);
+                                        localStorage.removeItem('customerHistory');
+                                        toast({ description: "تم مسح السجل." });
+                                    }}>
+                                        <Trash2 className="ml-2 h-4 w-4" />
+                                        مسح السجل
+                                    </Button>
+                                )}
+                            </SheetFooter>
+                        </SheetContent>
+                    </Sheet>
+                </div>
                 <div className="absolute top-0 right-0">
                     <Dialog>
                         <DialogTrigger asChild>
@@ -390,3 +491,5 @@ export function ClientForm() {
     </Form>
   );
 }
+
+    
