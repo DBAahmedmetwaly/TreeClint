@@ -34,6 +34,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Separator } from '@/components/ui/separator';
 
@@ -148,7 +150,7 @@ export function ClientForm() {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Network className="h-8 w-8 text-primary"/>
-                    <CardTitle className="font-headline text-3xl">مدير عملاء تري للملابس</CardTitle>
+                    <CardTitle className="font-headline text-3xl">إدخال بيانات عملاء تري</CardTitle>
                 </div>
                 <Dialog>
                     <DialogTrigger asChild>
@@ -161,7 +163,7 @@ export function ClientForm() {
                         <DialogHeader>
                             <DialogTitle>إعدادات الاتصال</DialogTitle>
                             <DialogDescription>
-                                أدخل تفاصيل الاتصال بقاعدة بيانات SQL Server. هذه القيم مخفية للحماية.
+                                قم بتعديل تفاصيل الاتصال هنا. سيتم استخدام هذه الإعدادات عند الضغط على زر "جلب الفروع".
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
@@ -230,6 +232,11 @@ export function ClientForm() {
                                 )}
                             />
                         </div>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button type="button">إغلاق</Button>
+                            </DialogClose>
+                        </DialogFooter>
                     </DialogContent>
                 </Dialog>
             </div>

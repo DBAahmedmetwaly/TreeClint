@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'مدير عملاء تري للملابس',
-  description: 'إدارة بيانات عملاء شركة تري للملابس بكفاءة.',
+  title: 'إدخال بيانات عملاء تري',
+  description: 'إدخال وتحديث بيانات عملاء شركة تري للملابس.',
 };
 
 export default function RootLayout({
