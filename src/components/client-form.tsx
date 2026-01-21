@@ -242,7 +242,6 @@ export function ClientForm() {
                     <CardTitle className="font-headline text-3xl">إدخال بيانات عملاء تري</CardTitle>
                 </div>
             </div>
-            <CardDescription className="text-center pt-2">انقر على الترس لتعديل الإعدادات، ثم قم بجلب الفروع لتسجيل العملاء.</CardDescription>
         </CardHeader>
         <CardContent>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
