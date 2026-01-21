@@ -1,25 +1,25 @@
 
 export const GET_BRANCHES_QUERY = `
--- This query retrieves the list of branches.
--- It MUST return two columns: 'branch' for the value/ID, and 'a_name' for the display label.
--- Example: SELECT branch_code as branch, arabic_name as a_name FROM my_branch_table;
+-- هذا الاستعلام يجلب قائمة الفروع.
+-- يجب أن يُرجع عمودين: 'branch' للقيمة/المعرف، و 'a_name' للتسمية المعروضة.
+-- مثال: SELECT branch_code as branch, arabic_name as a_name FROM my_branch_table;
 SELECT branch, a_name 
 FROM sys_branch 
 ORDER BY a_name;
 `;
 
 export const UPDATE_CUSTOMER_QUERY = `
--- This script checks if a customer exists and is unused, then updates it.
--- @cardNumber: The customer's card number (INT)
--- @branchName: The selected branch name (NVARCHAR)
--- @customerName: The customer's name (NVARCHAR)
--- @gender: The customer's gender ('1' for male, '2' for female) (VARCHAR)
--- @phoneNumber: The customer's work phone (VARCHAR)
+-- هذا السكريبت يتحقق مما إذا كان العميل موجودًا وغير مستخدم، ثم يقوم بتحديثه.
+-- @cardNumber: رقم كارت العميل (INT)
+-- @branchName: اسم الفرع المختار (NVARCHAR)
+-- @customerName: اسم العميل (NVARCHAR)
+-- @gender: جنس العميل ('1' للذكر, '2' للانثى) (VARCHAR)
+-- @phoneNumber: رقم هاتف العمل الخاص بالعميل (VARCHAR)
 
--- First, check if the customer meets the criteria
+-- أولاً، تحقق مما إذا كان العميل يفي بالمعايير
 IF (SELECT COUNT(*) FROM pos_customer WHERE customerno = @cardNumber AND usage = 0 AND a_name IS NULL) = 1
 BEGIN
-    -- If so, perform the update
+    -- إذا كان الأمر كذلك، قم بإجراء التحديث
     UPDATE pos_customer
     SET
         branch = @branchName,
@@ -31,27 +31,27 @@ BEGIN
     WHERE
         customerno = @cardNumber AND usage = 0 AND a_name IS NULL;
     
-    -- Return a success message
-    SELECT 'Customer updated successfully.' AS message;
+    -- إرجاع رسالة نجاح
+    SELECT 'تم تحديث العميل بنجاح.' AS message;
 END
 ELSE
 BEGIN
-    -- Otherwise, return a failure message explaining why
+    -- خلاف ذلك، قم بإرجاع رسالة فشل توضح السبب
     IF (SELECT COUNT(*) FROM pos_customer WHERE customerno = @cardNumber) = 0
     BEGIN
-        SELECT 'Customer not found.' AS message;
+        SELECT 'العميل غير موجود.' AS message;
     END
     ELSE IF (SELECT COUNT(*) FROM pos_customer WHERE customerno = @cardNumber AND usage != 0) > 0
     BEGIN
-        SELECT 'Customer is already in use.' AS message;
+        SELECT 'العميل مستخدم بالفعل.' AS message;
     END
     ELSE IF (SELECT COUNT(*) FROM pos_customer WHERE customerno = @cardNumber AND a_name IS NOT NULL) > 0
     BEGIN
-        SELECT 'Customer name is not null.' AS message;
+        SELECT 'اسم العميل مسجل بالفعل.' AS message;
     END
     ELSE
     BEGIN
-        SELECT 'Customer does not meet update criteria.' AS message;
+        SELECT 'العميل لا يفي بمعايير التحديث.' AS message;
     END
 END
 `;

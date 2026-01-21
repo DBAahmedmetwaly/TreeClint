@@ -6,17 +6,17 @@ import sql from 'mssql';
 import { GET_BRANCHES_QUERY, UPDATE_CUSTOMER_QUERY } from '@/lib/queries';
 
 const clientFormSchema = z.object({
-  serverIp: z.string().min(1, { message: 'Server IP is required.' }),
-  username: z.string().min(1, { message: 'Username is required.' }),
+  serverIp: z.string().min(1, { message: 'عنوان IP الخاص بالخادم مطلوب.' }),
+  username: z.string().min(1, { message: 'اسم المستخدم مطلوب.' }),
   password: z.string().optional(),
-  database: z.string().min(1, { message: 'Database name is required.' }),
+  database: z.string().min(1, { message: 'اسم قاعدة البيانات مطلوب.' }),
   branch: z.string({
-    required_error: 'You need to select a branch.',
-  }).min(1, { message: 'You need to select a branch.' }),
-  cardNumber: z.string().min(1, { message: 'Card number is required.' }),
-  customerName: z.string().min(1, { message: 'Customer name is required.' }),
-  phoneNumber: z.string().min(1, { message: 'Phone number is required.' }),
-  gender: z.enum(['1', '2'], { required_error: 'Gender is required.' }),
+    required_error: 'يجب عليك اختيار فرع.',
+  }).min(1, { message: 'يجب عليك اختيار فرع.' }),
+  cardNumber: z.string().min(1, { message: 'رقم الكارت مطلوب.' }),
+  customerName: z.string().min(1, { message: 'اسم العميل مطلوب.' }),
+  phoneNumber: z.string().min(1, { message: 'رقم الهاتف مطلوب.' }),
+  gender: z.enum(['1', '2'], { required_error: 'الجنس مطلوب.' }),
 });
 
 
@@ -24,7 +24,7 @@ export async function submitClientData(data: z.infer<typeof clientFormSchema>) {
     const parsedData = clientFormSchema.safeParse(data);
 
     if (!parsedData.success) {
-        return { success: false, message: 'Invalid data provided.' };
+        return { success: false, message: 'البيانات المقدمة غير صالحة.' };
     }
     
     const {
@@ -64,11 +64,11 @@ export async function submitClientData(data: z.infer<typeof clientFormSchema>) {
 
         await sql.close();
         
-        const message = result.recordset[0]?.message || 'No message returned from database.';
-        if (message.includes('success')) {
-            return { success: true, message: `Customer ${customerName} (Card: ${cardNumber}) updated successfully.` };
+        const message = result.recordset[0]?.message || 'لم يتم إرجاع رسالة من قاعدة البيانات.';
+        if (message.includes('بنجاح')) {
+            return { success: true, message: message };
         } else {
-            return { success: false, message: `Failed to update customer: ${message}` };
+            return { success: false, message: message };
         }
 
     } catch (err: any) {
@@ -76,7 +76,7 @@ export async function submitClientData(data: z.infer<typeof clientFormSchema>) {
         if (sql.connected) {
             await sql.close();
         }
-        let errorMessage = 'An error occurred during the database operation.';
+        let errorMessage = 'حدث خطأ أثناء عملية قاعدة البيانات.';
         if (err.message) {
             errorMessage = err.message;
         }
@@ -86,10 +86,10 @@ export async function submitClientData(data: z.infer<typeof clientFormSchema>) {
 
 
 const connectionSchema = z.object({
-  serverIp: z.string().min(1, { message: 'Server IP is required.' }),
-  username: z.string().min(1, { message: 'Username is required.' }),
+  serverIp: z.string().min(1, { message: 'عنوان IP الخاص بالخادم مطلوب.' }),
+  username: z.string().min(1, { message: 'اسم المستخدم مطلوب.' }),
   password: z.string().optional(),
-  database: z.string().min(1, { message: 'Database name is required.' }),
+  database: z.string().min(1, { message: 'اسم قاعدة البيانات مطلوب.' }),
 });
 
 
@@ -97,7 +97,7 @@ export async function getBranches(data: z.infer<typeof connectionSchema>) {
     const parsedData = connectionSchema.safeParse(data);
 
     if (!parsedData.success) {
-        return { success: false, message: 'Invalid connection data.', branches: [] };
+        return { success: false, message: 'بيانات الاتصال غير صالحة.', branches: [] };
     }
 
     const { serverIp, username, password, database } = parsedData.data;
@@ -126,10 +126,10 @@ export async function getBranches(data: z.infer<typeof connectionSchema>) {
         }));
         
         if (branches.length === 0) {
-            return { success: true, message: 'Connection successful, but no branches found.', branches: [] };
+            return { success: true, message: 'تم الاتصال بنجاح، ولكن لم يتم العثور على فروع.', branches: [] };
         }
 
-        return { success: true, message: 'Branches fetched successfully!', branches };
+        return { success: true, message: 'تم جلب الفروع بنجاح!', branches };
 
     } catch (err: any) {
         console.error(err);
@@ -137,16 +137,16 @@ export async function getBranches(data: z.infer<typeof connectionSchema>) {
             await sql.close();
         }
         
-        let errorMessage = 'Failed to connect or fetch data. Please check your connection details and query.';
+        let errorMessage = 'فشل الاتصال أو جلب البيانات. يرجى التحقق من تفاصيل الاتصال والاستعلام.';
         if (err.code === 'ELOGIN') {
-            errorMessage = 'Login failed. Please check your username and password.';
+            errorMessage = 'فشل تسجيل الدخول. يرجى التحقق من اسم المستخدم وكلمة المرور.';
         } else if (err.code === 'ENOCONNECTION') {
-            errorMessage = 'Cannot connect to the server. Please check the Server IP.';
+            errorMessage = 'لا يمكن الاتصال بالخادم. يرجى التحقق من IP السيرفر.';
         } else if (err.message && err.message.includes('Invalid object name')) {
              if (err.message.includes('sys_branch')) {
-                errorMessage = `Could not find the 'sys_branch' table. Please check your database.`;
+                errorMessage = `تعذر العثور على جدول 'sys_branch'. يرجى التحقق من قاعدة بياناتك.`;
             } else {
-                errorMessage = `Could not find a table in your query. Please check your SQL query in src/lib/queries.ts.`;
+                errorMessage = `تعذر العثور على جدول في استعلامك. يرجى التحقق من استعلام SQL في src/lib/queries.ts.`;
             }
         }
         
