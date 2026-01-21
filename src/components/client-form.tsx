@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Server, User, KeyRound, Database, GitBranch, Loader2, CreditCard, Phone, Users, Settings, TreeDeciduous } from 'lucide-react';
 import { submitClientData, getBranches } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -133,6 +133,7 @@ export function ClientForm() {
         cardNumber: '',
         customerName: '',
         phoneNumber: '',
+        gender: undefined,
       });
     } else {
       toast({
@@ -237,8 +238,8 @@ export function ClientForm() {
                         </DialogContent>
                     </Dialog>
                 </div>
-                <div className="flex flex-col items-center gap-2 pt-4 text-center">
-                    <TreeDeciduous className="h-16 w-16 text-primary" />
+                <div className="flex flex-row items-center justify-center gap-4 pt-4">
+                    <TreeDeciduous className="h-12 w-12 text-primary" />
                     <CardTitle className="font-headline text-3xl">عملاء تري</CardTitle>
                 </div>
             </div>
