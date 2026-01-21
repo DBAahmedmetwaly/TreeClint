@@ -259,7 +259,7 @@ export function ClientForm() {
                         جاري جلب الفروع...
                     </>
                     ) : (
-                    '1. جلب الفروع'
+                    '1. اظهار الفروع'
                     )}
                 </Button>
                 
@@ -278,7 +278,7 @@ export function ClientForm() {
                                 <Select onValueChange={field.onChange} value={field.value || ''} disabled={!branchesFetched}>
                                 <FormControl>
                                     <SelectTrigger className="pr-10">
-                                    <SelectValue placeholder="اختر فرعًا بعد جلبه" />
+                                    <SelectValue />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -286,15 +286,12 @@ export function ClientForm() {
                                         branches.map(branch => <SelectItem key={branch.value} value={branch.value}>{branch.label}</SelectItem>)
                                     ) : (
                                         <SelectItem value="placeholder" disabled>
-                                            {branchesFetched ? "لم يتم العثور على فروع" : "قم بجلب الفروع أولاً"}
+                                            {branchesFetched ? "لم يتم العثور على فروع" : "قم بإظهار الفروع أولاً"}
                                         </SelectItem>
                                     )}
                                 </SelectContent>
                                 </Select>
                             </div>
-                            <FormDescription>
-                                يتم ملء قائمة الفروع من قاعدة بياناتك.
-                            </FormDescription>
                             <FormMessage />
                             </FormItem>
                         )}
@@ -308,7 +305,7 @@ export function ClientForm() {
                             <div className="relative">
                             <CreditCard className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <FormControl>
-                                <Input placeholder="مثال: 12345" {...field} className="pr-10" />
+                                <Input {...field} className="pr-10" />
                             </FormControl>
                             </div>
                             <FormMessage />
@@ -324,7 +321,7 @@ export function ClientForm() {
                             <div className="relative">
                             <User className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <FormControl>
-                                <Input placeholder="مثال: جون دو" {...field} className="pr-10" />
+                                <Input {...field} className="pr-10" />
                             </FormControl>
                             </div>
                             <FormMessage />
@@ -340,7 +337,7 @@ export function ClientForm() {
                             <div className="relative">
                             <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <FormControl>
-                                <Input placeholder="مثال: 555-1234" {...field} className="pr-10" />
+                                <Input {...field} className="pr-10" />
                             </FormControl>
                             </div>
                             <FormMessage />
@@ -358,7 +355,7 @@ export function ClientForm() {
                                 <Select onValueChange={field.onChange} value={field.value || ''} >
                                 <FormControl>
                                     <SelectTrigger className="pr-10">
-                                    <SelectValue placeholder="اختر الجنس" />
+                                    <SelectValue />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
