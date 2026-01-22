@@ -23,8 +23,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Server, User, KeyRound, Database, GitBranch, Loader2, CreditCard, Phone, Users, Settings, TreeDeciduous, History, Trash2 } from 'lucide-react';
-import { submitClientData, getBranches } from '@/app/actions';
+import { Server, User, KeyRound, Database, GitBranch, Loader2, CreditCard, Phone, Users, Settings, TreeDeciduous, History, Trash2, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
+import { submitClientData, getBranches, checkConnection } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import {
@@ -47,6 +47,7 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 
 
 const formSchema = z.object({
@@ -77,6 +78,9 @@ export function ClientForm() {
   const [branches, setBranches] = useState<{ value: string; label: string; }[]>([]);
   const [branchesFetched, setBranchesFetched] = useState(false);
   const [history, setHistory] = useState<LogEntry[]>([]);
+  const [isCheckingConnection, setIsCheckingConnection] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'success' | 'error'>('unknown');
+
 
   useEffect(() => {
     try {
@@ -104,6 +108,31 @@ export function ClientForm() {
       phoneNumber: '',
     },
   });
+
+  const handleCheckConnection = async () => {
+    setIsCheckingConnection(true);
+    const connectionData = form.getValues();
+    
+    const result = await checkConnection(connectionData);
+
+    setIsCheckingConnection(false);
+
+    if (result.success) {
+      setConnectionStatus('success');
+      toast({
+        title: 'نجاح',
+        description: result.message,
+      });
+    } else {
+      setConnectionStatus('error');
+      toast({
+        variant: 'destructive',
+        title: 'فشل الاتصال',
+        description: result.message,
+      });
+    }
+  }
+
 
   const handleFetchBranches = async () => {
     const isValid = await form.trigger(['serverIp', 'username', 'database', 'password']);
@@ -348,6 +377,20 @@ export function ClientForm() {
         <CardContent>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 
+                <div className="flex flex-col items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <Button type="button" variant="outline" onClick={handleCheckConnection} disabled={isCheckingConnection}>
+                            {isCheckingConnection ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <RefreshCw className="ml-2 h-4 w-4" />}
+                            التحقق من الاتصال
+                        </Button>
+                        {connectionStatus === 'success' && <Badge className="bg-green-500 text-white flex items-center gap-1"><CheckCircle2 className="h-4 w-4" />متصل</Badge>}
+                        {connectionStatus === 'error' && <Badge variant="destructive" className="flex items-center gap-1"><XCircle className="h-4 w-4" />منفصل</Badge>}
+                        {connectionStatus === 'unknown' && <Badge variant="secondary">لم يتم التحقق</Badge>}
+                    </div>
+                    <Separator />
+                </div>
+
+
                 <Button 
                     type="button" 
                     onClick={handleFetchBranches}
