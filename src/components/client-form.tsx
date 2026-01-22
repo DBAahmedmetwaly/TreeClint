@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Server, User, KeyRound, Database, GitBranch, Loader2, CreditCard, Phone, Users, Settings, TreeDeciduous, History, Trash2, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
+import { Server, User, KeyRound, Database, GitBranch, Loader2, CreditCard, Phone, Users, Settings, History, Trash2, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
 import { submitClientData, getBranches, checkConnection } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
@@ -204,18 +204,20 @@ export function ClientForm() {
       });
 
 
-      const currentValues = form.getValues();
+      const { serverIp, username, password, database, branch } = form.getValues();
       form.reset({
-        serverIp: currentValues.serverIp,
-        username: currentValues.username,
-        password: currentValues.password,
-        database: currentValues.database,
-        branch: currentValues.branch,
+        serverIp,
+        username,
+        password,
+        database,
+        branch, // Keep branch
         cardNumber: '',
         customerName: '',
         phoneNumber: '',
         gender: undefined,
       });
+      form.setFocus('cardNumber');
+      
     } else {
       toast({
         variant: 'destructive',
@@ -378,7 +380,29 @@ export function ClientForm() {
                     </Dialog>
                 </div>
                 <div className="flex flex-row items-center justify-center gap-4 pt-4">
-                    <TreeDeciduous className="h-12 w-12 text-primary" />
+                    <svg
+                        viewBox="0 0 60 70"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-primary"
+                    >
+                        <path
+                            d="M30 50 V 10 M30 20 L 15 10 M30 20 L 45 10 M30 35 L 10 25 M30 35 L 50 25"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            fill="none"
+                        />
+                        <text
+                            x="30"
+                            y="65"
+                            fontFamily="Tajawal, sans-serif"
+                            fontSize="20px"
+                            textAnchor="middle"
+                            fill="currentColor"
+                        >
+                            تري
+                        </text>
+                    </svg>
                     <CardTitle className="font-headline text-3xl">عملاء تري</CardTitle>
                 </div>
             </div>
@@ -529,3 +553,5 @@ export function ClientForm() {
     </Form>
   );
 }
+
+    
