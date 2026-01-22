@@ -360,7 +360,16 @@ export function ClientForm() {
                                     )}
                                 />
                             </div>
-                            <DialogFooter>
+                            <DialogFooter className="sm:justify-between items-center flex-wrap gap-2">
+                                <div className="flex items-center gap-2">
+                                    <Button type="button" variant="outline" onClick={handleCheckConnection} disabled={isCheckingConnection}>
+                                        {isCheckingConnection ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <RefreshCw className="ml-2 h-4 w-4" />}
+                                        التحقق من الاتصال
+                                    </Button>
+                                    {connectionStatus === 'success' && <Badge className="bg-green-500 text-white flex items-center gap-1"><CheckCircle2 className="h-4 w-4" />متصل</Badge>}
+                                    {connectionStatus === 'error' && <Badge variant="destructive" className="flex items-center gap-1"><XCircle className="h-4 w-4" />منفصل</Badge>}
+                                    {connectionStatus === 'unknown' && <Badge variant="secondary">لم يتم التحقق</Badge>}
+                                </div>
                                 <DialogClose asChild>
                                     <Button type="button">إغلاق</Button>
                                 </DialogClose>
@@ -377,20 +386,6 @@ export function ClientForm() {
         <CardContent>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 
-                <div className="flex flex-col items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <Button type="button" variant="outline" onClick={handleCheckConnection} disabled={isCheckingConnection}>
-                            {isCheckingConnection ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <RefreshCw className="ml-2 h-4 w-4" />}
-                            التحقق من الاتصال
-                        </Button>
-                        {connectionStatus === 'success' && <Badge className="bg-green-500 text-white flex items-center gap-1"><CheckCircle2 className="h-4 w-4" />متصل</Badge>}
-                        {connectionStatus === 'error' && <Badge variant="destructive" className="flex items-center gap-1"><XCircle className="h-4 w-4" />منفصل</Badge>}
-                        {connectionStatus === 'unknown' && <Badge variant="secondary">لم يتم التحقق</Badge>}
-                    </div>
-                    <Separator />
-                </div>
-
-
                 <Button 
                     type="button" 
                     onClick={handleFetchBranches}
@@ -534,5 +529,3 @@ export function ClientForm() {
     </Form>
   );
 }
-
-    
